@@ -189,7 +189,7 @@ const detectKeyBtn = document.getElementById('detectKey');
 detectKeyBtn.addEventListener('click', async () => {
   if (!currentTrack) return alert('No track selected!');
 
-  const essentia = await EssentiaWASM();
+  const essentia = new Essentia.EssentiaWASM(Essentia.default);
   const url = `${songFolder}${currentTrack}`;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
