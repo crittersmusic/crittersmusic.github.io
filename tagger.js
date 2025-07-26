@@ -184,3 +184,32 @@ detectBtn.addEventListener('click', () => {
       alert('Failed to detect BPM.');
     });
 });
+const detectKeyBtn = document.getElementById('detectKey');
+
+detectKeyBtn.addEventListener('click', async () => {
+  if (!currentTrack) return alert('No track selected!');
+
+  const essentia = await EssentiaWASM();
+  const url = `${songFolder}${currentTrack}`;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  try {
+    const res = await fetch(url);
+    const arrayBuffer = await res.arrayBuffer();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const pcm = audioBuffer.getChannelData(0);
+
+    const result = essentia.KeyDetector(pcm, audioCtx.sampleRate);
+
+    const key = result.key;       // e.g., "C"
+    const scale = result.scale;   // e.g., "minor"
+
+    const display = `${key} ${scale}`;
+    alert(`Detected key: ${display}`);
+
+    setTagButton('keyOptions', key);
+  } catch (err) {
+    console.error('Key detection failed:', err);
+    alert('Key detection failed.');
+  }
+});
