@@ -3,25 +3,63 @@ let songList = [];
 const tags = {};
 let currentTrack = '';
 
-// DOM elements
+const moodOptionsList = ['Happy', 'Sad', 'Chill', 'Aggressive', 'Weird AF', 'Trippy'];
+const keyOptionsList = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const bpmOptionsList = [60, 70, 80, 90, 100, 110, 120, 140];
+
 const audioPicker = document.getElementById('audioPicker');
 const audioPlayer = document.getElementById('audioPlayer');
-const bpmInput = document.getElementById('bpm');
-const keyInput = document.getElementById('key');
-const moodInput = document.getElementById('mood');
-const notesInput = document.getElementById('notes');
 const saveBtn = document.getElementById('saveBtn');
 const exportBtn = document.getElementById('exportBtn');
 const jsonPreview = document.getElementById('jsonPreview');
+const notesInput = document.getElementById('notes');
 
-// Fetch the song list
+// These hold the user's current selections
+let selectedBPM = '';
+let selectedKey = '';
+let selectedMood = '';
+
+function createTagButtons(containerId, options, type) {
+  const container = document.getElementById(containerId);
+  options.forEach(option => {
+    const btn = document.createElement('button');
+    btn.textContent = option;
+    btn.className = 'px-3 py-1 rounded bg-gray-700 hover:bg-gray-600';
+    btn.addEventListener('click', () => {
+      // Unselect others
+      Array.from(container.children).forEach(child => {
+        child.classList.remove('bg-blue-500');
+        child.classList.add('bg-gray-700');
+      });
+      btn.classList.add('bg-blue-500');
+      btn.classList.remove('bg-gray-700');
+      if (type === 'bpm') selectedBPM = option;
+      if (type === 'key') selectedKey = option;
+      if (type === 'mood') selectedMood = option;
+    });
+    container.appendChild(btn);
+  });
+}
+
+function setTagButton(containerId, value) {
+  const container = document.getElementById(containerId);
+  Array.from(container.children).forEach(btn => {
+    if (btn.textContent === value) {
+      btn.click();
+    }
+  });
+}
+
 fetch('songs.json')
   .then(res => res.json())
   .then(data => {
-    console.log('Loaded songs:', data); // 🔍 Debug
     songList = data;
     populateDropdown();
     loadInitialTrack();
+    // Create tag buttons
+    createTagButtons('bpmOptions', bpmOptionsList, 'bpm');
+    createTagButtons('keyOptions', keyOptionsList, 'key');
+    createTagButtons('moodOptions', moodOptionsList, 'mood');
   })
   .catch(err => {
     console.error('Could not load songs.json:', err);
@@ -55,18 +93,22 @@ audioPicker.addEventListener('change', () => {
 
 function loadTags(file) {
   const data = tags[file] || {};
-  bpmInput.value = data.bpm || '';
-  keyInput.value = data.key || '';
-  moodInput.value = data.mood || '';
+  selectedBPM = data.bpm || '';
+  selectedKey = data.key || '';
+  selectedMood = data.mood || '';
   notesInput.value = data.notes || '';
+
+  setTagButton('bpmOptions', selectedBPM);
+  setTagButton('keyOptions', selectedKey);
+  setTagButton('moodOptions', selectedMood);
 }
 
 saveBtn.addEventListener('click', () => {
   if (!currentTrack) return alert('No track selected!');
   tags[currentTrack] = {
-    bpm: bpmInput.value.trim(),
-    key: keyInput.value.trim(),
-    mood: moodInput.value.trim(),
+    bpm: selectedBPM,
+    key: selectedKey,
+    mood: selectedMood,
     notes: notesInput.value.trim(),
   };
   updateJSONPreview();
