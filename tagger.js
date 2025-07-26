@@ -1,17 +1,9 @@
-// tagger.js
-
 const songFolder = 'songs/';
-const songList = [
-  // Manually list your songs for now, or auto-generate this in future
-  'song1.mp3',
-  'song2.mp3',
-  'song3.wav',
-  // Add all 300+ here or generate this list from your file system using Node or a build script
-];
-
+let songList = [];
 const tags = {};
 let currentTrack = '';
 
+// DOM elements
 const audioPicker = document.getElementById('audioPicker');
 const audioPlayer = document.getElementById('audioPlayer');
 const bpmInput = document.getElementById('bpm');
@@ -22,51 +14,65 @@ const saveBtn = document.getElementById('saveBtn');
 const exportBtn = document.getElementById('exportBtn');
 const jsonPreview = document.getElementById('jsonPreview');
 
-// Populate dropdown
-songList.forEach(file => {
-  const option = document.createElement('option');
-  option.value = file;
-  option.textContent = file;
-  audioPicker.appendChild(option);
-});
+// Fetch the song list
+fetch('songs.json')
+  .then(res => res.json())
+  .then(data => {
+    console.log('Loaded songs:', data); // 🔍 Debug
+    songList = data;
+    populateDropdown();
+    loadInitialTrack();
+  })
+  .catch(err => {
+    console.error('Could not load songs.json:', err);
+    alert('Could not load songs.json!');
+  });
 
-// Load selected song
-audioPicker.addEventListener('change', () => {
-  const file = audioPicker.value;
-  currentTrack = file;
-  audioPlayer.src = `${songFolder}${file}`;
-  loadTags(file);
-});
+function populateDropdown() {
+  audioPicker.innerHTML = '';
+  songList.forEach(file => {
+    const option = document.createElement('option');
+    option.value = file;
+    option.textContent = file;
+    audioPicker.appendChild(option);
+  });
+}
 
-// Load existing tags into form if they exist
-function loadTags(file) {
-  if (tags[file]) {
-    bpmInput.value = tags[file].bpm || '';
-    keyInput.value = tags[file].key || '';
-    moodInput.value = tags[file].mood || '';
-    notesInput.value = tags[file].notes || '';
-  } else {
-    bpmInput.value = '';
-    keyInput.value = '';
-    moodInput.value = '';
-    notesInput.value = '';
+function loadInitialTrack() {
+  if (songList.length > 0) {
+    currentTrack = songList[0];
+    audioPicker.value = currentTrack;
+    audioPlayer.src = `${songFolder}${currentTrack}`;
+    loadTags(currentTrack);
   }
 }
 
-// Save tags for current song
+audioPicker.addEventListener('change', () => {
+  currentTrack = audioPicker.value;
+  audioPlayer.src = `${songFolder}${currentTrack}`;
+  loadTags(currentTrack);
+});
+
+function loadTags(file) {
+  const data = tags[file] || {};
+  bpmInput.value = data.bpm || '';
+  keyInput.value = data.key || '';
+  moodInput.value = data.mood || '';
+  notesInput.value = data.notes || '';
+}
+
 saveBtn.addEventListener('click', () => {
-  if (!currentTrack) return alert('Select a song first!');
+  if (!currentTrack) return alert('No track selected!');
   tags[currentTrack] = {
     bpm: bpmInput.value.trim(),
     key: keyInput.value.trim(),
     mood: moodInput.value.trim(),
-    notes: notesInput.value.trim()
+    notes: notesInput.value.trim(),
   };
   updateJSONPreview();
   alert(`Saved tags for ${currentTrack}`);
 });
 
-// Export tags as a JSON file
 exportBtn.addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(tags, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -77,17 +83,6 @@ exportBtn.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-// Show live preview
 function updateJSONPreview() {
   jsonPreview.textContent = JSON.stringify(tags, null, 2);
 }
-
-// Auto-load the first song on page load
-window.addEventListener('load', () => {
-  if (songList.length > 0) {
-    audioPicker.value = songList[0];
-    currentTrack = songList[0];
-    audioPlayer.src = `${songFolder}${songList[0]}`;
-    loadTags(songList[0]);
-  }
-});
