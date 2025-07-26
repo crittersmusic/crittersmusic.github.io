@@ -143,11 +143,15 @@ detectBtn.addEventListener('click', () => {
       const peaks = [];
 
       // Basic peak detection
-      for (let i = 0; i < rawData.length; i += 1000) {
-        if (Math.abs(rawData[i]) > 0.9) {
-          peaks.push(i);
-        }
-      }
+     for (let i = 0; i < rawData.length; i += 500) {
+  const sample = Math.abs(rawData[i]);
+  if (sample > 0.4) {
+    // Don't add duplicate or close-by peaks
+    if (peaks.length === 0 || (i - peaks[peaks.length - 1]) > 10000) {
+      peaks.push(i);
+    }
+  }
+}
 
       if (peaks.length < 2) {
         alert('Not enough peaks found for BPM detection.');
