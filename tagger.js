@@ -128,3 +128,55 @@ exportBtn.addEventListener('click', () => {
 function updateJSONPreview() {
   jsonPreview.textContent = JSON.stringify(tags, null, 2);
 }
+const detectBtn = document.getElementById('detectBPM');
+
+detectBtn.addEventListener('click', () => {
+  if (!currentTrack) return alert('No track selected!');
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  fetch(`${songFolder}${currentTrack}`)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      const rawData = audioBuffer.getChannelData(0); // left channel
+      const sampleRate = audioBuffer.sampleRate;
+      const peaks = [];
+
+      // Basic peak detection
+      for (let i = 0; i < rawData.length; i += 1000) {
+        if (Math.abs(rawData[i]) > 0.9) {
+          peaks.push(i);
+        }
+      }
+
+      if (peaks.length < 2) {
+        alert('Not enough peaks found for BPM detection.');
+        return;
+      }
+
+      const intervals = [];
+      for (let i = 1; i < peaks.length; i++) {
+        intervals.push((peaks[i] - peaks[i - 1]) / sampleRate);
+      }
+
+      const averageInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      let bpmEstimate = Math.round(60 / averageInterval);
+
+      // Normalize to common range
+      while (bpmEstimate > 180) bpmEstimate /= 2;
+      while (bpmEstimate < 60) bpmEstimate *= 2;
+      bpmEstimate = Math.round(bpmEstimate);
+
+      // Snap to closest bpm option
+      const closest = bpmOptionsList.reduce((prev, curr) =>
+        Math.abs(curr - bpmEstimate) < Math.abs(prev - bpmEstimate) ? curr : prev
+      );
+
+      alert(`Detected BPM: ~${bpmEstimate} (Snapped to ${closest})`);
+      setTagButton('bpmOptions', closest);
+    })
+    .catch(err => {
+      console.error('BPM detection failed:', err);
+      alert('Failed to detect BPM.');
+    });
+});
