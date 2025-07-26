@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Song Tagger</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+  <script defer src="tagger.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">🎧 Manual Song Tagger</h1>
 
+    <div class="mb-4">
+      <label for="audioPicker" class="block mb-2">Select a song:</label>
+      <select id="audioPicker" class="text-black p-2 w-full rounded">
+        <!-- Populated by JS -->
+      </select>
+    </div>
+
+    <audio id="audioPlayer" controls class="w-full mb-4">
+      <source src="" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-1">BPM:</label>
+        <input type="text" id="bpm" class="text-black w-full p-2 rounded">
+      </div>
+      <div>
+        <label class="block mb-1">Key:</label>
+        <input type="text" id="key" class="text-black w-full p-2 rounded">
+      </div>
+      <div>
+        <label class="block mb-1">Mood:</label>
+        <input type="text" id="mood" class="text-black w-full p-2 rounded">
+      </div>
+      <div>
+        <label class="block mb-1">Notes:</label>
+        <textarea id="notes" class="text-black w-full p-2 rounded"></textarea>
+      </div>
+    </div>
+
+    <div class="mt-6 flex gap-4">
+      <button id="saveBtn" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Save Tag</button>
+      <button id="exportBtn" class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded">Export Tags</button>
+    </div>
+
+    <pre id="jsonPreview" class="mt-8 bg-gray-800 p-4 text-sm overflow-auto rounded"></pre>
+  </div>
+</body>
+</html>
