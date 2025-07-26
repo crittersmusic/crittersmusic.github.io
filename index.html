@@ -14,12 +14,10 @@
 
     <div class="mb-4">
       <label for="audioPicker" class="block mb-2">Select a song:</label>
-      <select id="audioPicker" class="text-black p-2 w-full rounded">
-        <!-- Populated by JS -->
-      </select>
+      <select id="audioPicker" class="text-black p-2 w-full rounded"></select>
     </div>
 
-    <audio id="audioPlayer" controls class="w-full mb-4">
+    <audio id="audioPlayer" controls class="w-full mb-6">
       <source src="" type="audio/mpeg" />
       Your browser does not support the audio element.
     </audio>
@@ -27,15 +25,15 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <label class="block mb-1">BPM:</label>
-        <input type="text" id="bpm" class="text-black w-full p-2 rounded">
+        <div id="bpmOptions" class="flex flex-wrap gap-2"></div>
       </div>
       <div>
         <label class="block mb-1">Key:</label>
-        <input type="text" id="key" class="text-black w-full p-2 rounded">
+        <div id="keyOptions" class="flex flex-wrap gap-2"></div>
       </div>
       <div>
         <label class="block mb-1">Mood:</label>
-        <input type="text" id="mood" class="text-black w-full p-2 rounded">
+        <div id="moodOptions" class="flex flex-wrap gap-2"></div>
       </div>
       <div>
         <label class="block mb-1">Notes:</label>
